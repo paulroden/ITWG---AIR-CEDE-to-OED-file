@@ -1,0 +1,8 @@
+{
+"Driver":"{SQL Server}",
+"Server":"<ServerHostName or IP>",
+"Database":"<AIR CEDE database>",
+"ID":"<UserID>",
+"PWD":"<Password>",
+"TrustedConnection":"<Yes or No>"
+}
