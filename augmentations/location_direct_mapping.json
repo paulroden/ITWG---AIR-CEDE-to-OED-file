@@ -35,7 +35,7 @@
 "LocUserDef3":"UserDefined3",
 "LocUserDef4":"UserDefined4",
 "LocUserDef5":"UserDefined5",
-"LocPerilsCovered":"PerilSetCode",
+"LocPerilsCovered":"ContractPerilSetCode",
 "BuildingTIV":"ReplacementValueA",
 "OtherTIV":"ReplacementValueB",
 "ContentsTIV":"ReplacementValueC",
