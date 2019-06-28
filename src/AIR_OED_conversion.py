@@ -13,6 +13,7 @@ from outputwriter import output_write
 def main():  
     """
     This is the main script..
+    Logger is initiated for logging purpose.
     Calling all the instances here in this block.
     """       
     logger = logging_process()                                   
@@ -22,6 +23,7 @@ def main():
     OED_location_file_value_mapped = mapping().value_mapping(OED_location_file_direct_mapped,AIR_location_file,logger)
     OED_location_file_final = mapping().conditional_mapping(OED_location_file_value_mapped,AIR_location_file,logger)
     output_write(OED_location_file_final,logger)
+    
 
 if __name__ == "__main__":
     main()
