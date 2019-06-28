@@ -6,9 +6,8 @@ Created on Thu Jun 27 14:55:56 2019
 """
 import sys
 import pandas as pd
+import ConfigParser
 import pyodbc
-import json
-import sql_queries
 
 class pre_process:
     """
@@ -23,9 +22,9 @@ class pre_process:
         These data are joined as per rquirement shared in the documentation.
         """
         try:
-            with open(r"..\augmentations\connection_string1.json") as json_file:  
-                self.dbconn = json.load(json_file)            
-            self.connection_string = r'Driver='+self.dbconn['Driver']+';Server='+self.dbconn['Server']+';Database='+self.dbconn['Database']+';Trusted_Connection='+self.dbconn['TrustedConnection']+';UID='+self.dbconn['ID']+';PWD='+self.dbconn['PWD']+';'
+            config = ConfigParser.ConfigParser()
+            config.read(r"..\augmentations\config.ini")
+            self.connection_string = r'Driver='+config.get('dbconnection', 'Driver') +';Server='+config.get('dbconnection', 'Server')+';Database='+config.get('dbconnection', 'Database')+';Trusted_Connection='+config.get('dbconnection', 'TrustedConnection')+';UID='+config.get('dbconnection', 'ID')+';PWD='+config.get('dbconnection', 'PWD')+';'
             self.sql_conn_AIR = pyodbc.connect(self.connection_string)
             logger.info('Successfully Connected to CEDE AIR Database')
         except Exception as e:
@@ -35,7 +34,7 @@ class pre_process:
             sys.exit(0)
         
         try:
-            self.query_tLocTm_tLoc_tExSet_tLocFeat =  sql_queries.query_tLocTm_tLoc_tExSet_tLocFeat                        
+            self.query_tLocTm_tLoc_tExSet_tLocFeat =  config.get('queries', 'query_tLocTm_tLoc_tExSet_tLocFeat')                        
             self.AIR_location_file = pd.read_sql(self.query_tLocTm_tLoc_tExSet_tLocFeat, self.sql_conn_AIR) 
             logger.info('Successfully read data from AIR DB for Tlocterm, Tloc, Texpset, tlocFeat')
         except Exception as e:
@@ -45,7 +44,7 @@ class pre_process:
             sys.exit(0)
           
         try:    
-            self.query_tLoc_tContr = sql_queries.query_tLoc_tContr       
+            self.query_tLoc_tContr = config.get('queries', 'query_tLoc_tContr')        
             self.ContractID  = pd.read_sql(self.query_tLoc_tContr, self.sql_conn_AIR)
             self.AIR_location_file = self.AIR_location_file.join(self.ContractID)  
             logger.info('Successfully read data from AIR DB for ContractID from tloc, tcontract')                  
@@ -56,7 +55,7 @@ class pre_process:
             sys.exit(0)              
                        
         try:
-            self.query_tlclx_tlc = sql_queries.query_tlclx_tlc
+            self.query_tlclx_tlc = config.get('queries', 'query_tlclx_tlc') 
             self.LayerConditionSID  = pd.read_sql(self.query_tlclx_tlc, self.sql_conn_AIR)
             self.AIR_location_file = self.AIR_location_file.join(self.LayerConditionSID) 
             self.sql_conn_AIR.close()
