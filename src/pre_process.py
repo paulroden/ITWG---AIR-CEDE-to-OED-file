@@ -31,8 +31,8 @@ class pre_process:
             logger.info('Issue in Database Connection')
             logger.error(e)
             print("Error Check Log file")
-            sys.exit(0)
-        
+            sys.exit(0)  
+            
         try:
             self.query_tLocTm_tLoc_tExSet_tLocFeat =  config.get('queries', 'query_tLocTm_tLoc_tExSet_tLocFeat')                        
             self.AIR_location_file = pd.read_sql(self.query_tLocTm_tLoc_tExSet_tLocFeat, self.sql_conn_AIR) 
@@ -42,7 +42,7 @@ class pre_process:
             logger.error(e)
             print("Error Check Log file")
             sys.exit(0)
-          
+            
         try:    
             self.query_tLoc_tContr = config.get('queries', 'query_tLoc_tContr')        
             self.ContractID  = pd.read_sql(self.query_tLoc_tContr, self.sql_conn_AIR)
@@ -66,7 +66,7 @@ class pre_process:
             logger.error(e) 
             print("Error Check Log file")
             sys.exit(0)
-
+    
     
     def OED_file_preprocess(self,logger):
         """
