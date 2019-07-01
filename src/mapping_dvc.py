@@ -6,6 +6,9 @@ Created on Thu Jun 27 14:40:59 2019
 """
 import sys
 import json
+import ConfigParser
+import pyodbc
+import pandas as pd
 
 
 class mapping:
@@ -20,7 +23,7 @@ class mapping:
         and based on that the AIR data column in written to OED file using corresponding key
         values.
         """
-        try:
+        try:            
             with open(r"..\augmentations\location_direct_mapping.json") as json_file:  
                 self.location_direct_mapping = json.load(json_file)
             logger.info('Successfully loaded direct mapping json file')                  
@@ -33,13 +36,14 @@ class mapping:
         try:
             for key in self.location_direct_mapping:  
                 OED_location_file[key] = AIR_location_file[self.location_direct_mapping[key]] 
-            OED_location_file_direct_mapped = OED_location_file
+            
             logger.info('Successfully assign data in OED file as per direct mapping json file')                  
         except Exception as e:
             logger.info('Error in assigning data in OED file as per direct mapping json file') 
             logger.error(e)
             print("Error Check Log file")
             sys.exit(0)
+        OED_location_file_direct_mapped = OED_location_file
         return OED_location_file_direct_mapped
         
     def value_mapping(self,OED_location_file_direct_mapped,AIR_location_file,logger):
@@ -100,13 +104,35 @@ class mapping:
             logger.error(e) 
             print("Error Check Log file")
             sys.exit(0)
-         
-        
+            
+            
+        try:
+            config = ConfigParser.ConfigParser()
+            config.read(r"..\augmentations\config.ini")
+            self.connection_string = r'Driver='+config.get('reference_dbconnection', 'Driver') +';Server='+config.get('reference_dbconnection', 'Server')+';Database='+config.get('reference_dbconnection', 'Database')+';Trusted_Connection='+config.get('reference_dbconnection', 'TrustedConnection')+';UID='+config.get('reference_dbconnection', 'ID')+';PWD='+config.get('reference_dbconnection', 'PWD')+';'
+            self.sql_conn_AIR_reference = pyodbc.connect(self.connection_string)
+            self.reference_perilsetcode = config.get('queries', 'query_peril_setcode') 
+            self.peril_set_code  = pd.read_sql(self.reference_perilsetcode, self.sql_conn_AIR_reference, index_col=['PerilSetCode'])
+            logger.info('Successfully connected to reference database for peril mapping')                  
+        except Exception as e:
+            logger.info('Issue in connectiing to reference database for peril mapping')
+            logger.error(e)   
+            print("Error Check Log file")
+            sys.exit(0)
+            
+    
 
         for index, row in OED_location_file_direct_mapped.iterrows():
             try:   
-                OED_location_file_direct_mapped['LocPeril'] = OED_location_file_direct_mapped['LocPeril'].astype(str)
-                OED_location_file_direct_mapped.at[index, 'LocPeril'] = self.peril_mapping['{}'.format(OED_location_file_direct_mapped.at[index, 'LocPeril'])] 
+                OED_location_file_direct_mapped['LocPeril'] = OED_location_file_direct_mapped['LocPeril'].astype(str)  
+                OED_location_file_direct_mapped.at[index, 'LocPeril'] =  self.peril_set_code.at[int(OED_location_file_direct_mapped.at[index, 'LocPeril']),'PerilSet'] 
+                temp_perils =  OED_location_file_direct_mapped.at[index, 'LocPeril'].split(', ')
+                OED_peril_list = []
+                for peril in temp_perils:
+                    OED_peril = self.peril_mapping[peril]
+                    OED_peril_list.append(OED_peril)
+                OED_peril_final = ';'.join(OED_peril_list)
+                OED_location_file_direct_mapped.at[index, 'LocPeril'] = OED_peril_final
                 logger.info('Successfully assigned peril value for LocPeril data')                  
             except Exception as e:
                 logger.info('Issue in assigning peril value for LocPeril data')
@@ -114,14 +140,22 @@ class mapping:
                 print("Error Check Log file")
                 sys.exit(0)
                 
-            try:
+                
+            try:   
                 OED_location_file_direct_mapped['LocPerilsCovered'] = OED_location_file_direct_mapped['LocPerilsCovered'].astype(str)
-                OED_location_file_direct_mapped.at[index, 'LocPerilsCovered'] = self.peril_mapping['{}'.format(OED_location_file_direct_mapped.at[index, 'LocPerilsCovered'])] 
+                OED_location_file_direct_mapped.at[index, 'LocPerilsCovered'] =  self.peril_set_code.at[int(OED_location_file_direct_mapped.at[index, 'LocPerilsCovered']),'PerilSet'] 
+                temp_perils =  OED_location_file_direct_mapped.at[index, 'LocPerilsCovered'].split(', ')
+                OED_peril_list = []
+                for peril in temp_perils:
+                    OED_peril = self.peril_mapping[peril]
+                    OED_peril_list.append(OED_peril)
+                OED_peril_final = ';'.join(OED_peril_list)
+                OED_location_file_direct_mapped.at[index, 'LocPerilsCovered'] = OED_peril_final
                 logger.info('Successfully assigned peril value for LocPerilsCovered data')                  
             except Exception as e:
                 logger.info('Issue in assigning peril value for LocPerilsCovered data')
-                logger.error(e) 
-                print("Error Check Log file")    
+                logger.error(e)   
+                print("Error Check Log file")
                 sys.exit(0)
                 
             try:
@@ -153,14 +187,15 @@ class mapping:
                 
             try:
                 OED_location_file_direct_mapped.at[index, 'FloorAreaUnit'] = self.unit_mapping['{}'.format(OED_location_file_direct_mapped.at[index, 'FloorAreaUnit'])] 
-                OED_location_file_value_mapped = OED_location_file_direct_mapped
+                
                 logger.info('Successfully assigning UnitMapping value for UnitMapping data')                  
             except Exception as e:
                 logger.info('Issue in assigning UnitMapping value for UnitMapping data')
                 logger.error(e)
                 print("Error Check Log file")
                 sys.exit(0)
-            return OED_location_file_value_mapped    
+        OED_location_file_value_mapped = OED_location_file_direct_mapped
+        return OED_location_file_value_mapped    
 
     def conditional_mapping(self,OED_location_file_value_mapped, AIR_location_file,logger):
         """
