@@ -7,15 +7,16 @@ Created on Mon Jun 24 14:30:13 2019
 
 from mapping_dvc import mapping
 from pre_process import pre_process
-from logger import logging_process 
-from outputwriter import output_write            
-                 
-def main():  
+from logger import logging_process
+from outputwriter import output_write
+
+def main():
     """
     This is the main script..
+    Logger is initiated for logging purpose.
     Calling all the instances here in this block.
-    """       
-    logger, logging = logging_process()                                   
+    """
+    logger, logging = logging_process()
     AIR_location_file = pre_process().read_sql_data(logger)
     OED_location_file = pre_process().OED_file_preprocess(logger)
     OED_location_file_direct_mapped = mapping().direct_mapping(OED_location_file,AIR_location_file,logger)

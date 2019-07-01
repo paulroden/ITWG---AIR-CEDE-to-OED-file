@@ -12,6 +12,7 @@ def logging_process():
     """
     Initiating logging in a file named conversion.log for each step
     The logging would have error tags if encounter any error.
+    Config.ini is configuration file which has all configuration related to logging.
     """
     try:
         config = ConfigParser.RawConfigParser()
