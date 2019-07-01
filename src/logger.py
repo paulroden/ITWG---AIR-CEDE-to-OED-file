@@ -25,7 +25,7 @@ def logging_process():
         logger.addHandler(hdlr) 
         logger.setLevel(logging.INFO)
         logger.info('Successfully initiated logging process')
-        return logger
+        return logger,logging
     except Exception as e:
         logger.info('Issue initiating logging process')
         logger.error(e)
