@@ -9,8 +9,7 @@ import sys
 """
 This will write an output csv in output folder in this directory.
 """   
-def output_write(OED_location_file_final,logger):
-    
+def output_write(OED_location_file_final,logger):   
     try:
         OED_location_file_final.to_csv(r"..\output\OED_input.csv",index=False)   
         logger.info('Successfully written output file')                  

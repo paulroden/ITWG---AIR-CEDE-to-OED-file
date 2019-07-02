@@ -103,4 +103,6 @@
 "BuildingExteriorOpening":"BuildingExteriorOpeningCode",
 "ServiceEquipmentProtection":"ServiceEquipmentProtectionCode",
 "TallOneStory":"TallOneStoryCode",
-"TerrainRoughness":"TerrainRoughnessCode"}
+"TerrainRoughness":"TerrainRoughnessCode",
+"GeogName1":"SubareaName",
+"GeogName2":"Subarea2Name"}
