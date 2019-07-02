@@ -31,8 +31,8 @@ class pre_process:
             logger.info('Issue in Database Connection')
             logger.error(e)
             print("Error Check Log file")
-            sys.exit(0)  
-            
+            sys.exit(0)
+        
         try:
             self.query_tLocTm_tLoc_tExSet_tLocFeat =  config.get('queries', 'query_tLocTm_tLoc_tExSet_tLocFeat')                        
             self.AIR_location_file = pd.read_sql(self.query_tLocTm_tLoc_tExSet_tLocFeat, self.sql_conn_AIR) 
@@ -42,7 +42,7 @@ class pre_process:
             logger.error(e)
             print("Error Check Log file")
             sys.exit(0)
-            
+          
         try:    
             self.query_tLoc_tContr = config.get('queries', 'query_tLoc_tContr')        
             self.ContractID  = pd.read_sql(self.query_tLoc_tContr, self.sql_conn_AIR)
@@ -57,16 +57,17 @@ class pre_process:
         try:
             self.query_tlclx_tlc = config.get('queries', 'query_tlclx_tlc') 
             self.LayerConditionSID  = pd.read_sql(self.query_tlclx_tlc, self.sql_conn_AIR)
-            self.AIR_location_file = self.AIR_location_file.join(self.LayerConditionSID) 
+            self.temptable = pd.merge(self.AIR_location_file, self.LayerConditionSID, how='inner', on=['ContractSID','LocationSID']) 
+            self.temptable = self.temptable.groupby(['ContractSID','LocationSID'])['CondNumber'].first().reset_index()
+            self.AIR_location_file = pd.merge(self.temptable,self.AIR_location_file, how='inner',on=['ContractSID','LocationSID'])    
             self.sql_conn_AIR.close()
-            return self.AIR_location_file
             logger.info('Successfully read data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
         except Exception as e:   
             logger.info('Issue in reading data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
             logger.error(e) 
             print("Error Check Log file")
             sys.exit(0)
-    
+        return self.AIR_location_file
     
     def OED_file_preprocess(self,logger):
         """

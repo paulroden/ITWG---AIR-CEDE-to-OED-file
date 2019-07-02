@@ -119,8 +119,7 @@ class mapping:
             logger.error(e)   
             print("Error Check Log file")
             sys.exit(0)
-            
-    
+                
 
         for index, row in OED_location_file_direct_mapped.iterrows():
             try:   
@@ -186,14 +185,24 @@ class mapping:
                 sys.exit(0)
                 
             try:
-                OED_location_file_direct_mapped.at[index, 'FloorAreaUnit'] = self.unit_mapping['{}'.format(OED_location_file_direct_mapped.at[index, 'FloorAreaUnit'])] 
-                
+                OED_location_file_direct_mapped.at[index, 'FloorAreaUnit'] = self.unit_mapping['{}'.format(OED_location_file_direct_mapped.at[index, 'FloorAreaUnit'])]                 
                 logger.info('Successfully assigning UnitMapping value for UnitMapping data')                  
             except Exception as e:
                 logger.info('Issue in assigning UnitMapping value for UnitMapping data')
                 logger.error(e)
                 print("Error Check Log file")
                 sys.exit(0)
+                           
+            try:
+                OED_location_file_direct_mapped.at[index, 'GeogScheme1'] = "XSUBA"   
+                OED_location_file_direct_mapped.at[index, 'GeogScheme2'] = "XSUB2"
+                logger.info('Successfully assigning Geographic scheme with constant')                  
+            except Exception as e:
+                logger.info('Issue in assigning Geographic scheme with constant')
+                logger.error(e)
+                print("Error Check Log file")
+                sys.exit(0)
+                
         OED_location_file_value_mapped = OED_location_file_direct_mapped
         return OED_location_file_value_mapped    
 
@@ -318,8 +327,7 @@ class mapping:
             logger.info('Issue in assigning Deductible term value as per DeductibleTypeCode condition')
             logger.error(e)
             print("Error Check Log file")
-            sys.exit(0)
-        
+            sys.exit(0)          
         try:        
             for index, row in OED_location_file_value_mapped.iterrows():
                 OED_location_file_value_mapped.at[index,'CondPriority'] = 1
