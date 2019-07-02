@@ -57,7 +57,9 @@ class pre_process:
         try:
             self.query_tlclx_tlc = config.get('queries', 'query_tlclx_tlc') 
             self.LayerConditionSID  = pd.read_sql(self.query_tlclx_tlc, self.sql_conn_AIR)
-            self.AIR_location_file = pd.merge(self.AIR_location_file, self.LayerConditionSID, how='inner', on=['ContractSID','LocationSID'])
+            self.temptable = pd.merge(self.AIR_location_file, self.LayerConditionSID, how='inner', on=['ContractSID','LocationSID']) 
+            self.temptable = self.temptable.groupby(['ContractSID','LocationSID'])['CondNumber'].first().reset_index()
+            self.AIR_location_file = pd.merge(self.temptable,self.AIR_location_file, how='inner',on=['ContractSID','LocationSID'])    
             self.sql_conn_AIR.close()
             logger.info('Successfully read data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
         except Exception as e:   

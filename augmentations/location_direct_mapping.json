@@ -44,7 +44,7 @@
 "LocCurrency":"CurrencyCode",
 "LocGrossPremium":"Premium",
 "NonCatGroundUpLoss":"NonCATGroundUpLoss",
-"CondNumber":"LayerConditionSID",
+"CondNumber":"CondNumber",
 "LocPeril":"PerilSetCode",
 "RoofCover":"RoofCoverCode",
 "RoofYearBuilt":"RoofYearBuilt",

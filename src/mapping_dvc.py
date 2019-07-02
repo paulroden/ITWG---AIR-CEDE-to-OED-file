@@ -119,8 +119,7 @@ class mapping:
             logger.error(e)   
             print("Error Check Log file")
             sys.exit(0)
-            
-    
+                
 
         for index, row in OED_location_file_direct_mapped.iterrows():
             try:   
@@ -193,8 +192,7 @@ class mapping:
                 logger.error(e)
                 print("Error Check Log file")
                 sys.exit(0)
-                
-            
+                           
             try:
                 OED_location_file_direct_mapped.at[index, 'GeogScheme1'] = "XSUBA"   
                 OED_location_file_direct_mapped.at[index, 'GeogScheme2'] = "XSUB2"
