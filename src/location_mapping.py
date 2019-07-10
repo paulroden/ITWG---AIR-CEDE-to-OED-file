@@ -37,7 +37,17 @@ class mapping:
         OED_location_file_value_mapped = genericmapping().value_mapper(constants.ADRRESS_MATCH_MAPPING,OED_location_file_direct_mapped,constants.ADDRESSMATCH_COL,True,logger)   
         OED_location_file_value_mapped = genericmapping().value_mapper(constants.OCCUPANCY_CODE_MAPPING,OED_location_file_direct_mapped,constants.OCCUPANCY_COL,False,logger)   
         OED_location_file_value_mapped = genericmapping().value_mapper(constants.CONSTRUCTION_CODE_MAPPING,OED_location_file_direct_mapped,constants.CONSTRUCTION_COL,False,logger)   
-        OED_location_file_value_mapped = genericmapping().value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.FLOORAREA_COL,False,logger)   
+        OED_location_file_value_mapped = genericmapping().value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.FLOORAREA_COL,False,logger) 
+        for index, row in OED_location_file_value_mapped.iterrows():
+            try:
+                OED_location_file_value_mapped.at[index, 'GeogScheme1'] = "XSUBA"   
+                OED_location_file_value_mapped.at[index, 'GeogScheme2'] = "XSUB2"
+                logger.info('Successfully assigning Geographic scheme with constant')                  
+            except Exception as e:
+                logger.info('Issue in assigning Geographic scheme with constant')
+                logger.error(e)
+                print("Error Check Log file")
+                sys.exit(0)
         return OED_location_file_value_mapped    
 
     def conditional_mapping(self,OED_location_file_value_mapped, AIR_location_file,logger):

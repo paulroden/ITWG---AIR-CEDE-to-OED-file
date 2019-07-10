@@ -29,8 +29,8 @@ def main():
     OED_location_file_value_mapped = mapping().value_mapping(OED_location_file_direct_mapped,AIR_location_file,logger)
     OED_location_file_final = mapping().conditional_mapping(OED_location_file_value_mapped,AIR_location_file,logger)
     filehelper().output_write(OED_location_file_final,constants.OP_LOCATION,logger)
-    
-        
+
+            
     OED_account_file_blank = filehelper().OED_account_file_blank(logger)
     AIR_account_file = AIR_base_file().AIR_account_read(logger) 
     OED_direct_mapped = genericmapping().direct_mapping(OED_account_file_blank, AIR_account_file, constants.ACCOUNT_DIRECT_MAPPING_JSON, logger)
