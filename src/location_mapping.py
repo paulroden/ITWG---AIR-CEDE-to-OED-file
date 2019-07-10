@@ -5,11 +5,8 @@ Created on Thu Jun 27 14:40:59 2019
 @author: kumar.shivam
 """
 import sys
-import json
-import ConfigParser
-import pyodbc
-import pandas as pd
-
+from generic_mapping import genericmapping
+from constants import constants
 
 class mapping:
     """
@@ -23,27 +20,7 @@ class mapping:
         and based on that the AIR data column in written to OED file using corresponding key
         values.
         """
-        try:            
-            with open(r"..\augmentations\location_direct_mapping.json") as json_file:  
-                self.location_direct_mapping = json.load(json_file)
-            logger.info('Successfully loaded direct mapping json file')                  
-        except Exception as e:
-            logger.info('Issue in loading direct mapping json file') 
-            logger.error(e)
-            print("Error Check Log file")
-            sys.exit(0)
-            
-        try:
-            for key in self.location_direct_mapping:  
-                OED_location_file[key] = AIR_location_file[self.location_direct_mapping[key]] 
-            
-            logger.info('Successfully assign data in OED file as per direct mapping json file')                  
-        except Exception as e:
-            logger.info('Error in assigning data in OED file as per direct mapping json file') 
-            logger.error(e)
-            print("Error Check Log file")
-            sys.exit(0)
-        OED_location_file_direct_mapped = OED_location_file
+        OED_location_file_direct_mapped = genericmapping().direct_mapping(OED_location_file, AIR_location_file, constants.LOCATION_DIRECT_MAPPING_JSON, logger)
         return OED_location_file_direct_mapped
         
     def value_mapping(self,OED_location_file_direct_mapped,AIR_location_file,logger):
@@ -54,156 +31,13 @@ class mapping:
         These value mappings are written in respective json file.
         These json files are used to map values for the mentioned columns.
         
-        """
-        try:
-            with open(r"..\augmentations\peril_mapping.json") as json_file:  
-                self.peril_mapping = json.load(json_file)
-            logger.info('Successfully read peril value mapping data')                  
-        except Exception as e:
-            logger.info('Issue in reading peril value mapping data')
-            logger.error(e)  
-            print("Error Check Log file")   
-            sys.exit(0)             
-         
-        try:
-            with open(r"..\augmentations\address_match_mapping.json") as json_file:  
-                self.address_match_mapping = json.load(json_file)
-            logger.info('Successfully read address match value mapping data')                  
-        except Exception as e:
-            logger.info('Issue in reading address match value mapping data')
-            logger.error(e)  
-            print("Error Check Log file")
-            sys.exit(0)
-         
-        try:
-            with open(r"..\augmentations\construction_codes.json") as json_file:  
-                self.construction_codes = json.load(json_file)
-            logger.info('Successfully read construction code value mapping data')                  
-        except Exception as e:
-            logger.info('Issue in reading construction code value mapping data')
-            logger.error(e)   
-            print("Error Check Log file")
-            sys.exit(0)
-         
-        try:
-            with open(r"..\augmentations\occupancy_codes.json") as json_file:  
-                self.occupancy_codes = json.load(json_file) 
-            logger.info('Successfully read occupancy mapping code data')                  
-        except Exception as e:
-            logger.info('Issue in reading occupancy mapping code data')
-            logger.error(e) 
-            print("Error Check Log file")
-            sys.exit(0)
-        
-        try:
-            with open(r"..\augmentations\unit_mapping.json") as json_file:  
-                self.unit_mapping = json.load(json_file)
-            logger.info('Successfully read unit mapping code data')                  
-        except Exception as e:
-            logger.info('Issue in reading unit mapping code data')
-            logger.error(e) 
-            print("Error Check Log file")
-            sys.exit(0)
-            
-            
-        try:
-            config = ConfigParser.ConfigParser()
-            config.read(r"..\augmentations\config.ini")
-            self.connection_string = r'Driver='+config.get('reference_dbconnection', 'Driver') +';Server='+config.get('reference_dbconnection', 'Server')+';Database='+config.get('reference_dbconnection', 'Database')+';Trusted_Connection='+config.get('reference_dbconnection', 'TrustedConnection')+';UID='+config.get('reference_dbconnection', 'ID')+';PWD='+config.get('reference_dbconnection', 'PWD')+';'
-            self.sql_conn_AIR_reference = pyodbc.connect(self.connection_string)
-            self.reference_perilsetcode = config.get('queries', 'query_peril_setcode') 
-            self.peril_set_code  = pd.read_sql(self.reference_perilsetcode, self.sql_conn_AIR_reference, index_col=['PerilSetCode'])
-            logger.info('Successfully connected to reference database for peril mapping')                  
-        except Exception as e:
-            logger.info('Issue in connectiing to reference database for peril mapping')
-            logger.error(e)   
-            print("Error Check Log file")
-            sys.exit(0)
-                
-
-        for index, row in OED_location_file_direct_mapped.iterrows():
-            try:   
-                OED_location_file_direct_mapped['LocPeril'] = OED_location_file_direct_mapped['LocPeril'].astype(str)  
-                OED_location_file_direct_mapped.at[index, 'LocPeril'] =  self.peril_set_code.at[int(OED_location_file_direct_mapped.at[index, 'LocPeril']),'PerilSet'] 
-                temp_perils =  OED_location_file_direct_mapped.at[index, 'LocPeril'].split(', ')
-                OED_peril_list = []
-                for peril in temp_perils:
-                    OED_peril = self.peril_mapping[peril]
-                    OED_peril_list.append(OED_peril)
-                OED_peril_final = ';'.join(OED_peril_list)
-                OED_location_file_direct_mapped.at[index, 'LocPeril'] = OED_peril_final
-                logger.info('Successfully assigned peril value for LocPeril data')                  
-            except Exception as e:
-                logger.info('Issue in assigning peril value for LocPeril data')
-                logger.error(e)   
-                print("Error Check Log file")
-                sys.exit(0)
-                
-                
-            try:   
-                OED_location_file_direct_mapped['LocPerilsCovered'] = OED_location_file_direct_mapped['LocPerilsCovered'].astype(str)
-                OED_location_file_direct_mapped.at[index, 'LocPerilsCovered'] =  self.peril_set_code.at[int(OED_location_file_direct_mapped.at[index, 'LocPerilsCovered']),'PerilSet'] 
-                temp_perils =  OED_location_file_direct_mapped.at[index, 'LocPerilsCovered'].split(', ')
-                OED_peril_list = []
-                for peril in temp_perils:
-                    OED_peril = self.peril_mapping[peril]
-                    OED_peril_list.append(OED_peril)
-                OED_peril_final = ';'.join(OED_peril_list)
-                OED_location_file_direct_mapped.at[index, 'LocPerilsCovered'] = OED_peril_final
-                logger.info('Successfully assigned peril value for LocPerilsCovered data')                  
-            except Exception as e:
-                logger.info('Issue in assigning peril value for LocPerilsCovered data')
-                logger.error(e)   
-                print("Error Check Log file")
-                sys.exit(0)
-                
-            try:
-                OED_location_file_direct_mapped.at[index, 'AddressMatch'] = self.address_match_mapping[OED_location_file_direct_mapped.at[index, 'AddressMatch']] 
-                logger.info('Successfully assigned address match value for AddressMatch data')                  
-            except Exception as e:
-                logger.info('Issue in assigning address match value for AddressMatch data')
-                logger.error(e) 
-                print("Error Check Log file")
-                sys.exit(0)
-                
-            try:
-                OED_location_file_direct_mapped.at[index, 'OccupancyCode'] = self.occupancy_codes['{}'.format(OED_location_file_direct_mapped.at[index, 'OccupancyCode'])] 
-                logger.info('Successfully assigning OccupancyCode value for OccupancyCode data')                  
-            except Exception as e:
-                logger.info('Issue in assigning OccupancyCode value for OccupancyCode data')
-                logger.error(e) 
-                print("Error Check Log file")
-                sys.exit(0)
-                                
-            try:
-                OED_location_file_direct_mapped.at[index, 'ConstructionCode'] = self.construction_codes['{}'.format(OED_location_file_direct_mapped.at[index, 'ConstructionCode'])] 
-                logger.info('Successfully assigning ConstructionCode value for ConstructionCode data')                  
-            except Exception as e:
-                logger.info('Issue in assigning ConstructionCode value for ConstructionCode data')
-                logger.error(e) 
-                print("Error Check Log file")  
-                sys.exit(0)
-                
-            try:
-                OED_location_file_direct_mapped.at[index, 'FloorAreaUnit'] = self.unit_mapping['{}'.format(OED_location_file_direct_mapped.at[index, 'FloorAreaUnit'])]                 
-                logger.info('Successfully assigning UnitMapping value for UnitMapping data')                  
-            except Exception as e:
-                logger.info('Issue in assigning UnitMapping value for UnitMapping data')
-                logger.error(e)
-                print("Error Check Log file")
-                sys.exit(0)
-                           
-            try:
-                OED_location_file_direct_mapped.at[index, 'GeogScheme1'] = "XSUBA"   
-                OED_location_file_direct_mapped.at[index, 'GeogScheme2'] = "XSUB2"
-                logger.info('Successfully assigning Geographic scheme with constant')                  
-            except Exception as e:
-                logger.info('Issue in assigning Geographic scheme with constant')
-                logger.error(e)
-                print("Error Check Log file")
-                sys.exit(0)
-                
-        OED_location_file_value_mapped = OED_location_file_direct_mapped
+        """           
+        OED_location_file_direct_mapped = genericmapping().peril_mapping(OED_location_file_direct_mapped,AIR_location_file,constants.OED_LOC_PERIL_COL,logger)
+        OED_location_file_direct_mapped = genericmapping().peril_mapping(OED_location_file_direct_mapped,AIR_location_file,constants.OED_LOC_PERIL_COV_COL,logger)      
+        OED_location_file_value_mapped = genericmapping().value_mapper(constants.ADRRESS_MATCH_MAPPING,OED_location_file_direct_mapped,constants.ADDRESSMATCH_COL,True,logger)   
+        OED_location_file_value_mapped = genericmapping().value_mapper(constants.OCCUPANCY_CODE_MAPPING,OED_location_file_direct_mapped,constants.OCCUPANCY_COL,False,logger)   
+        OED_location_file_value_mapped = genericmapping().value_mapper(constants.CONSTRUCTION_CODE_MAPPING,OED_location_file_direct_mapped,constants.CONSTRUCTION_COL,False,logger)   
+        OED_location_file_value_mapped = genericmapping().value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.FLOORAREA_COL,False,logger)   
         return OED_location_file_value_mapped    
 
     def conditional_mapping(self,OED_location_file_value_mapped, AIR_location_file,logger):
