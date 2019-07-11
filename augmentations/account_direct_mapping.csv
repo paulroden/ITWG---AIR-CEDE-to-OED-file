@@ -1,0 +1,24 @@
+﻿OED Column,AIR Column
+PortNumber,ExposureSetName
+AccNumber,ContractID
+AccName,InsuredName
+AccStatus,SubmitStatusCode
+ExpiringAccNumber,ExpiringContractID
+AccCurrency,CurrencyCode
+AccUserDef1,UserDefined1
+AccUserDef2,UserDefined2
+AccUserDef3,UserDefined3
+AccUserDef4,UserDefined4
+AccUserDef5,UserDefined5
+PolNumber,LayerID
+PolInceptionDate,InceptionDate
+PolExpiryDate,ExpirationDate
+ProducerName,ProducerName
+Underwriter,Underwriter
+BranchName,Branch
+LOB,UserLineOfBusiness
+PolGrossPremium,Premium
+AccPeril,PerilSetCode
+PolPerilsCovered,PerilSetCode
+PolPeril,PerilSetCode
+CondPeril,PerilSetCode

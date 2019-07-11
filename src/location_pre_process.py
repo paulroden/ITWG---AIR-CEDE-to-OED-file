@@ -7,7 +7,8 @@ Created on Thu Jun 27 14:55:56 2019
 import sys
 import pandas as pd
 import ConfigParser
-import pyodbc
+from constants import constants
+from db_helper import dbhelper
 
 class pre_process:
     """
@@ -23,19 +24,17 @@ class pre_process:
         """
         try:
             config = ConfigParser.ConfigParser()
-            config.read(r"..\augmentations\config.ini")
+            config.read(constants.CONFIG_FILE_PATH)
             self.connection_string = r'Driver='+config.get('dbconnection', 'Driver') +';Server='+config.get('dbconnection', 'Server')+';Database='+config.get('dbconnection', 'Database')+';Trusted_Connection='+config.get('dbconnection', 'TrustedConnection')+';UID='+config.get('dbconnection', 'ID')+';PWD='+config.get('dbconnection', 'PWD')+';'
-            self.sql_conn_AIR = pyodbc.connect(self.connection_string)
             logger.info('Successfully Connected to CEDE AIR Database')
         except Exception as e:
             logger.info('Issue in Database Connection')
             logger.error(e)
             print("Error Check Log file")
-            sys.exit(0)
-        
-        try:
-            self.query_tLocTm_tLoc_tExSet_tLocFeat =  config.get('queries', 'query_tLocTm_tLoc_tExSet_tLocFeat')                        
-            self.AIR_location_file = pd.read_sql(self.query_tLocTm_tLoc_tExSet_tLocFeat, self.sql_conn_AIR) 
+            sys.exit(0)       
+        try:            
+            self.query_tLocTm_tLoc_tExSet_tLocFeat =  config.get(constants.LOCATION_QUERY, constants.TLOCTM_TLOC_TEXPSET_TLOCFEAT)                        
+            self.AIR_location_file  = dbhelper().data_reader(self.query_tLocTm_tLoc_tExSet_tLocFeat,self.connection_string,None,logger) 
             logger.info('Successfully read data from AIR DB for Tlocterm, Tloc, Texpset, tlocFeat')
         except Exception as e:
             logger.info('Issue in reading data from AIR DB for Tlocterm, Tloc, Texpset, tlocFeat')
@@ -44,8 +43,8 @@ class pre_process:
             sys.exit(0)
           
         try:    
-            self.query_tLoc_tContr = config.get('queries', 'query_tLoc_tContr')        
-            self.ContractID  = pd.read_sql(self.query_tLoc_tContr, self.sql_conn_AIR)
+            self.query_tLoc_tContr = config.get(constants.LOCATION_QUERY, constants.TLOC_TCONTR)   
+            self.ContractID  = dbhelper().data_reader(self.query_tLoc_tContr,self.connection_string,None,logger) 
             self.AIR_location_file = self.AIR_location_file.join(self.ContractID)  
             logger.info('Successfully read data from AIR DB for ContractID from tloc, tcontract')                  
         except Exception as e:   
@@ -55,12 +54,11 @@ class pre_process:
             sys.exit(0)              
                        
         try:
-            self.query_tlclx_tlc = config.get('queries', 'query_tlclx_tlc') 
-            self.LayerConditionSID  = pd.read_sql(self.query_tlclx_tlc, self.sql_conn_AIR)
+            self.query_tlclx_tlc = config.get(constants.LOCATION_QUERY, constants.TLCLX_TLC) 
+            self.LayerConditionSID  = dbhelper().data_reader(self.query_tlclx_tlc,self.connection_string,None,logger) 
             self.temptable = pd.merge(self.AIR_location_file, self.LayerConditionSID, how='inner', on=['ContractSID','LocationSID']) 
             self.temptable = self.temptable.groupby(['ContractSID','LocationSID'])['CondNumber'].first().reset_index()
             self.AIR_location_file = pd.merge(self.temptable,self.AIR_location_file, how='inner',on=['ContractSID','LocationSID'])    
-            self.sql_conn_AIR.close()
             logger.info('Successfully read data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
         except Exception as e:   
             logger.info('Issue in reading data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
@@ -69,20 +67,5 @@ class pre_process:
             sys.exit(0)
         return self.AIR_location_file
     
-    def OED_file_preprocess(self,logger):
-        """
-        Reading the column names required for the OED files from location column names csv and creating
-        the empty dataframe with the same column names,
-        """
-        try:
-            self.OED_location_column_names = pd.read_csv(r"..\augmentations\location_column_names.csv",header = 0, index_col=0)
-            self.OED_location_column_names_list = self.OED_location_column_names['ColumnNames'].tolist()            
-            self.OED_location_file = pd.DataFrame(columns = self.OED_location_column_names_list)
-            return self.OED_location_file  
-            logger.info('Successfully created blank OED file')                  
-        except Exception as e:
-            logger.info('Issue in creating blank OED file') 
-            logger.error(e)  
-            print("Error Check Log file") 
-            sys.exit(0) 
+
                        
