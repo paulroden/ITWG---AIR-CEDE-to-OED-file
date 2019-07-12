@@ -102,7 +102,7 @@ class mapping_account:
             logger.info('Successfully done conditional mapping for account file.')                  
         except Exception as e:
             logger.info('Issue in conditional mapping for account file.')
-            logger.error(e)
+            logger.error(e,exc_info=True)
             print("Error Check Log file")
             sys.exit(0)
         return OED_file_value_mapped   

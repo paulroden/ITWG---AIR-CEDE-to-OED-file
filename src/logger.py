@@ -29,6 +29,6 @@ def logging_process():
         return logger,logging
     except Exception as e:
         logger.info('Issue initiating logging process')
-        logger.error(e)
+        logger.error(e,exc_info=True)
         print("Error Check Log file")
         sys.exit(0)

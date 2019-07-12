@@ -25,7 +25,7 @@ class filehelper:
             logger.info('Successfully created blank OED file')                  
         except Exception as e:
             logger.info('Issue in creating blank OED file') 
-            logger.error(e)  
+            logger.error(e,exc_info=True)  
             print("Error Check Log file") 
             sys.exit(0) 
             
@@ -44,7 +44,7 @@ class filehelper:
             logger.info('Successfully created blank account file for OED')                  
         except Exception as e:
             logger.info('Issue in creating blank account file for OED')
-            logger.error(e)
+            logger.error(e,exc_info=True)
             print("Error Check Log file")
             sys.exit(0)
      
@@ -61,7 +61,7 @@ class filehelper:
             logger.info('Successfully written output file %s' %FILE_PATH)                  
         except Exception as e:
             logger.info('Issue in writting file %s' %FILE_PATH)
-            logger.error(e)
+            logger.error(e,exc_info=True)
             print("Error Check Log file")
             sys.exit(0)
         
@@ -76,7 +76,7 @@ class filehelper:
             logger.info('Successfully written output file %s' %filename)                  
         except Exception as e:
             logger.info('Issue in writting file %s' %filename)
-            logger.error(e)
+            logger.error(e,exc_info=True)
             print("Error Check Log file")
             sys.exit(0)
         print("Succesfully written converted file in output folder %s" %filename)    

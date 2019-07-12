@@ -8,6 +8,7 @@ import ConfigParser
 from constants import constants
 from db_helper import dbhelper
 import sys
+import pandas as pd
 
 class AIR_base_file:    
     def AIR_account_read(self,logger):   
@@ -33,13 +34,17 @@ class AIR_base_file:
             self.Condname_num = dbhelper().data_reader(self.query_TLC_DISTINCT, self.connection_string,None,logger) 
            
             self.AIR_account_filetmp = self.ExposureSetName.join(self.ContractID)
-            self.AIR_account_filetmp = self.AIR_account_filetmp.join(self.Condname_num)
+            
             self.AIR_account_file = self.AIR_account_filetmp.join(self.LayerID)
-            return self.AIR_account_file 
+            
+            self.AIR_account_file = pd.merge(self.AIR_account_file, self.Condname_num, how='inner', on=['ContractSID','AppliesToTag'])
+            self.AIR_account_file = self.AIR_account_file.rename(columns = {"LayerConditionSID": "CondNumber","AppliesToTag": "CondName"}) 
+          
+            return self.AIR_account_file
             logger.info('Successfully read AIR DB and created account file')                 
         except Exception as e:
             logger.info('Issue in reading AIR DB and creating account file')
-            logger.error(e)
+            logger.error(e,exc_info=True)
             print("Error Check Log file")
             sys.exit(0)
          

@@ -23,7 +23,7 @@ class dbhelper:
             logger.info('Read data for connection string %s' %connection_string)                 
         except Exception as e:
             logger.info('Issue in reading data for connection string %s'%connection_string)
-            logger.error(e)
+            logger.error(e,exc_info=True)
             print("Error Check Log file")
             sys.exit(0)
          

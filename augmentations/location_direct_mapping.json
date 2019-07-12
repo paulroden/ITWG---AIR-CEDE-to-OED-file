@@ -97,7 +97,7 @@
 "Chimney":"ChimneyCode",
 "BrickVeneer":"BrickVeneerCode",
 "FEMACompliance":"FIRMComplianceCode",
-"CustomFloodSOP":"CustomFloodStandardOfProtection",
+"FloodDefenseHeight":"CustomFloodStandardOfProtection",
 "CustomFloodZone":"CustomFloodZoneCode",
 "MultiStoryHall":"MultiStoryHallCode",
 "BuildingExteriorOpening":"BuildingExteriorOpeningCode",

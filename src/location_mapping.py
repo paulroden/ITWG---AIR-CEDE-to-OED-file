@@ -21,6 +21,7 @@ class mapping:
         values.
         """
         OED_location_file_direct_mapped = genericmapping().direct_mapping(OED_location_file, AIR_location_file, constants.LOCATION_DIRECT_MAPPING_JSON, logger)
+        OED_location_file_direct_mapped['PercentComplete'] = OED_location_file_direct_mapped['PercentComplete'].replace(0.0,None)
         return OED_location_file_direct_mapped
         
     def value_mapping(self,OED_location_file_direct_mapped,AIR_location_file,logger):
@@ -45,7 +46,7 @@ class mapping:
                 logger.info('Successfully assigning Geographic scheme with constant')                  
             except Exception as e:
                 logger.info('Issue in assigning Geographic scheme with constant')
-                logger.error(e)
+                logger.error(e,exc_info=True)
                 print("Error Check Log file")
                 sys.exit(0)
         return OED_location_file_value_mapped    
@@ -78,7 +79,7 @@ class mapping:
             logger.info('Successfully assigning Limit term value as per LimitTypeCode condition')                  
         except Exception as e:
             logger.info('Issue in assigning Limit term value as per LimitTypeCode condition')
-            logger.error(e)  
+            logger.error(e,exc_info=True)  
             print("Error Check Log file")
             sys.exit(0)
         
@@ -127,7 +128,7 @@ class mapping:
                     OED_location_file_value_mapped.at[index, 'LocDedType4BI'] = 0
                     OED_location_file_value_mapped.at[index, 'LocMinDed4BI'] = 0
                     OED_location_file_value_mapped.at[index, 'LocMaxDed4BI'] = 0
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'S':
+                elif AIR_location_file['DeductibleTypeCode'][index] == 'S':                    
                     OED_location_file_value_mapped.at[index, 'LocDed6All'] = AIR_location_file['Deductible1'][index]+AIR_location_file['Deductible2'][index]+AIR_location_file['Deductible3'][index]+AIR_location_file['Deductible4'][index]
                     OED_location_file_value_mapped.at[index, 'LocDedCode6All'] = 0
                     OED_location_file_value_mapped.at[index, 'LocDedType6All'] = 0
@@ -169,7 +170,7 @@ class mapping:
             logger.info('Successfully assigning Deductible term value as per DeductibleTypeCode condition')                  
         except Exception as e:
             logger.info('Issue in assigning Deductible term value as per DeductibleTypeCode condition')
-            logger.error(e)
+            logger.error(e,exc_info=True)
             print("Error Check Log file")
             sys.exit(0)          
         try:        

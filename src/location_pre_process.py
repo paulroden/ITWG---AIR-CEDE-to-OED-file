@@ -29,7 +29,7 @@ class pre_process:
             logger.info('Successfully Connected to CEDE AIR Database')
         except Exception as e:
             logger.info('Issue in Database Connection')
-            logger.error(e)
+            logger.error(e,exc_info=True)
             print("Error Check Log file")
             sys.exit(0)       
         try:            
@@ -49,20 +49,18 @@ class pre_process:
             logger.info('Successfully read data from AIR DB for ContractID from tloc, tcontract')                  
         except Exception as e:   
             logger.info('Issue in reading data from AIR DB for ContractID from tloc, tcontract')   
-            logger.error(e)   
+            logger.error(e,exc_info=True)   
             print("Error Check Log file") 
             sys.exit(0)              
                        
         try:
             self.query_tlclx_tlc = config.get(constants.LOCATION_QUERY, constants.TLCLX_TLC) 
             self.LayerConditionSID  = dbhelper().data_reader(self.query_tlclx_tlc,self.connection_string,None,logger) 
-            self.temptable = pd.merge(self.AIR_location_file, self.LayerConditionSID, how='inner', on=['ContractSID','LocationSID']) 
-            self.temptable = self.temptable.groupby(['ContractSID','LocationSID'])['CondNumber'].first().reset_index()
-            self.AIR_location_file = pd.merge(self.temptable,self.AIR_location_file, how='inner',on=['ContractSID','LocationSID'])    
+            self.AIR_location_file = pd.merge(self.AIR_location_file, self.LayerConditionSID, how='inner', on=['LocationSID','PerilSetCode'])             
             logger.info('Successfully read data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
         except Exception as e:   
             logger.info('Issue in reading data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
-            logger.error(e) 
+            logger.error(e,exc_info=True) 
             print("Error Check Log file")
             sys.exit(0)
         return self.AIR_location_file
