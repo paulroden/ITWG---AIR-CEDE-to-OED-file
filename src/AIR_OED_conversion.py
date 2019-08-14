@@ -12,11 +12,10 @@ from file_helper import filehelper
 from constants import constants
 from generic_mapping import genericmapping
 from account_mapping import mapping_account
-from account_pre_process import  AIR_base_file
+from account_pre_process import AIR_base_file
+  
 
 
-
-    
 def main():
     """
     This is the main script..
@@ -40,7 +39,6 @@ def main():
     filehelper().output_write(OED_location_file_final,constants.OP_LOCATION,logger)
 
     
-
     OED_account_file_blank = filehelper().OED_account_file_blank(logger)
     print("OED blank account file prepared...")
     AIR_account_file = AIR_base_file().AIR_account_read(logger) 

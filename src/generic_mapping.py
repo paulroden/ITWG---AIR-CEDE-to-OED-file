@@ -69,19 +69,21 @@ class genericmapping:
             logger.error(e,exc_info=True)   
             print("Error Check Log file")
             sys.exit(0)
-            
+
+        OED_file_direct_mapped[mapping_column] = OED_file_direct_mapped[mapping_column].astype(str)
         for index, row in OED_file_direct_mapped.iterrows():
-            try:   
-                OED_file_direct_mapped[mapping_column] = OED_file_direct_mapped[mapping_column].astype(str)  
-                OED_file_direct_mapped.at[index,mapping_column] =  self.peril_set_code.at[int(OED_file_direct_mapped.at[index,mapping_column]),'PerilSet'] 
-                temp_perils =  OED_file_direct_mapped.at[index, mapping_column].split(', ')
-                OED_peril_list = []
-                for peril in temp_perils:
-                    OED_peril = self.peril_mapping[peril]
-                    OED_peril_list.append(OED_peril)
-                OED_peril_list = list(set(OED_peril_list))
-                OED_peril_final = ';'.join(OED_peril_list)
-                OED_file_direct_mapped.at[index, mapping_column] = OED_peril_final
+            try:
+                if OED_file_direct_mapped.at[index, mapping_column] != 'nan' and OED_file_direct_mapped.at[index, mapping_column] != 'None':
+                    OED_file_direct_mapped.at[index, mapping_column] = OED_file_direct_mapped.at[index,mapping_column].split(".")[0]
+                    OED_file_direct_mapped.at[index,mapping_column] =  self.peril_set_code.at[int(OED_file_direct_mapped.at[index,mapping_column]),'PerilSet']
+                    temp_perils =  OED_file_direct_mapped.at[index, mapping_column].split(', ')
+                    OED_peril_list = []
+                    for peril in temp_perils:
+                        OED_peril = self.peril_mapping[peril]
+                        OED_peril_list.append(OED_peril)
+                    OED_peril_list = list(set(OED_peril_list))
+                    OED_peril_final = ';'.join(OED_peril_list)
+                    OED_file_direct_mapped.at[index, mapping_column] = OED_peril_final
                 logger.info('Successfully assigned peril value for LocPeril data for mapping column %s' %mapping_column)                  
             except Exception as e:
                 logger.info('Issue in assigning peril value for LocPeril data for mapping column %s' %mapping_column)

@@ -56,7 +56,10 @@ class pre_process:
         try:
             self.query_tlclx_tlc = config.get(constants.LOCATION_QUERY, constants.TLCLX_TLC) 
             self.LayerConditionSID  = dbhelper().data_reader(self.query_tlclx_tlc,self.connection_string,None,logger) 
-            self.AIR_location_file = pd.merge(self.AIR_location_file, self.LayerConditionSID, how='inner', on=['LocationSID','PerilSetCode'])             
+            if len(self.LayerConditionSID) != 0:
+                self.AIR_location_file = pd.merge(self.AIR_location_file, self.LayerConditionSID, how='inner', on=['LocationSID','PerilSetCode'])    
+            else:
+                self.AIR_location_file['CondNumber'] = None
             logger.info('Successfully read data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
         except Exception as e:   
             logger.info('Issue in reading data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  

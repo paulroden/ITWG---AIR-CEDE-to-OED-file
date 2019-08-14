@@ -32,14 +32,18 @@ class AIR_base_file:
             
             self.query_TLC_DISTINCT = config.get(constants.ACCOUNT_QUERY,constants.TLC_DISTINCT)
             self.Condname_num = dbhelper().data_reader(self.query_TLC_DISTINCT, self.connection_string,None,logger) 
-           
-            self.AIR_account_filetmp = self.ExposureSetName.join(self.ContractID)
-            
-            self.AIR_account_file = self.AIR_account_filetmp.join(self.LayerID)
-            
-            self.AIR_account_file = pd.merge(self.AIR_account_file, self.Condname_num, how='inner', on=['ContractSID','AppliesToTag'])
-            self.AIR_account_file = self.AIR_account_file.rename(columns = {"LayerConditionSID": "CondNumber","AppliesToTag": "CondName"}) 
-          
+
+            self.AIR_account_filetmp = self.ExposureSetName.merge(self.ContractID, on="ExposureSetSID", how='inner')
+            self.AIR_account_file = self.AIR_account_filetmp.join(self.LayerID,how='outer')
+
+            if len(self.Condname_num) != 0:
+                self.AIR_account_file = pd.merge(self.AIR_account_file, self.Condname_num, how='inner', on=['ContractSID','AppliesToTag'])
+                self.AIR_account_file = self.AIR_account_file.rename(columns = {"LayerConditionSID": "CondNumber","AppliesToTag": "CondName"})
+            else:
+                self.AIR_account_file['CondNumber'] = None
+                self.AIR_account_file['CondName'] = None
+
+
             return self.AIR_account_file
             logger.info('Successfully read AIR DB and created account file')                 
         except Exception as e:
