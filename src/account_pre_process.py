@@ -43,9 +43,8 @@ class AIR_base_file:
                 self.AIR_account_file['CondNumber'] = None
                 self.AIR_account_file['CondName'] = None
 
-
+            logger.info('Successfully read AIR DB and created account file')
             return self.AIR_account_file
-            logger.info('Successfully read AIR DB and created account file')                 
         except Exception as e:
             logger.info('Issue in reading AIR DB and creating account file')
             logger.error(e,exc_info=True)

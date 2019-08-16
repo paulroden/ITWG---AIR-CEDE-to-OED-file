@@ -31,7 +31,8 @@ class pre_process:
             logger.info('Issue in Database Connection')
             logger.error(e,exc_info=True)
             print("Error Check Log file")
-            sys.exit(0)       
+            sys.exit(0)
+
         try:            
             self.query_tLocTm_tLoc_tExSet_tLocFeat =  config.get(constants.LOCATION_QUERY, constants.TLOCTM_TLOC_TEXPSET_TLOCFEAT)                        
             self.AIR_location_file  = dbhelper().data_reader(self.query_tLocTm_tLoc_tExSet_tLocFeat,self.connection_string,None,logger) 
@@ -66,7 +67,7 @@ class pre_process:
             logger.error(e,exc_info=True) 
             print("Error Check Log file")
             sys.exit(0)
-        return self.AIR_location_file
+        return self.AIR_location_file, config.get('dbconnection', 'Database'),config.get('dbconnection', 'Server')
     
 
                        

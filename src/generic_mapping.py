@@ -39,7 +39,7 @@ class genericmapping:
 
 
 
-    def peril_mapping(self,OED_file_direct_mapped,AIR_file,mapping_column,logger):
+    def peril_mapper(self,OED_file_direct_mapped,AIR_file,mapping_column,logger):
         """
         After the direct mapping is done then are few columns which requires data to undergo values mapping.
         These columns include peril mapping, address match level mapping, construction code mapping,
@@ -107,9 +107,9 @@ class genericmapping:
                  
             else:
                 for index, row in OED_file_direct_mapped.iterrows():
-                    OED_file_direct_mapped.at[index, column_name] = self.json_value_mapper['{}'.format(OED_file_direct_mapped.at[index, column_name])] 
-            return OED_file_direct_mapped 
-            logger.info('Successfully assigned value as per json mapping for %s' %json_path)                  
+                    OED_file_direct_mapped.at[index, column_name] = self.json_value_mapper['{}'.format(OED_file_direct_mapped.at[index, column_name])]
+            logger.info('Successfully assigned value as per json mapping for %s' %json_path)
+            return OED_file_direct_mapped
         except Exception as e:
             logger.info('Issue in assigning value as per json mapping for %s' %json_path)
             logger.error(e,exc_info=True)   

@@ -32,13 +32,14 @@ class mapping:
         These value mappings are written in respective json file.
         These json files are used to map values for the mentioned columns.
         
-        """           
-        OED_location_file_direct_mapped = genericmapping().peril_mapping(OED_location_file_direct_mapped,AIR_location_file,constants.OED_LOC_PERIL_COL,logger)
-        OED_location_file_direct_mapped = genericmapping().peril_mapping(OED_location_file_direct_mapped,AIR_location_file,constants.OED_LOC_PERIL_COV_COL,logger)      
-        OED_location_file_value_mapped = genericmapping().value_mapper(constants.ADRRESS_MATCH_MAPPING,OED_location_file_direct_mapped,constants.ADDRESSMATCH_COL,True,logger)   
-        OED_location_file_value_mapped = genericmapping().value_mapper(constants.OCCUPANCY_CODE_MAPPING,OED_location_file_direct_mapped,constants.OCCUPANCY_COL,False,logger)   
-        OED_location_file_value_mapped = genericmapping().value_mapper(constants.CONSTRUCTION_CODE_MAPPING,OED_location_file_direct_mapped,constants.CONSTRUCTION_COL,False,logger)   
-        OED_location_file_value_mapped = genericmapping().value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.FLOORAREA_COL,False,logger) 
+        """
+        genericmapping_obj = genericmapping()
+        OED_location_file_direct_mapped = genericmapping_obj.peril_mapper(OED_location_file_direct_mapped,AIR_location_file,constants.OED_LOC_PERIL_COL,logger)
+        OED_location_file_direct_mapped = genericmapping_obj.peril_mapper(OED_location_file_direct_mapped,AIR_location_file,constants.OED_LOC_PERIL_COV_COL,logger)
+        OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.ADRRESS_MATCH_MAPPING,OED_location_file_direct_mapped,constants.ADDRESSMATCH_COL,True,logger)
+        OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.OCCUPANCY_CODE_MAPPING,OED_location_file_direct_mapped,constants.OCCUPANCY_COL,False,logger)
+        OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.CONSTRUCTION_CODE_MAPPING,OED_location_file_direct_mapped,constants.CONSTRUCTION_COL,False,logger)
+        OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.FLOORAREA_COL,False,logger)
         for index, row in OED_location_file_value_mapped.iterrows():
             try:
                 OED_location_file_value_mapped.at[index, 'GeogScheme1'] = "XSUBA"   

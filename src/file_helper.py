@@ -57,8 +57,8 @@ class filehelper:
         try:
             with open(FILE_PATH) as json_file:  
                     self.json_op = json.load(json_file)
+            logger.info('Successfully written output file %s' %FILE_PATH)
             return self.json_op
-            logger.info('Successfully written output file %s' %FILE_PATH)                  
         except Exception as e:
             logger.info('Issue in writting file %s' %FILE_PATH)
             logger.error(e,exc_info=True)
