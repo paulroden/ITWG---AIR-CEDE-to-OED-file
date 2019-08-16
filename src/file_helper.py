@@ -72,7 +72,7 @@ class filehelper:
     """   
     def output_write(self,OED_location_file_final,filename,logger):   
         try:
-            OED_location_file_final.to_csv(filename, index=False)   
+            OED_location_file_final.to_csv(filename, index=False,  encoding = 'utf-8')
             logger.info('Successfully written output file %s' %filename)                  
         except Exception as e:
             logger.info('Issue in writting file %s' %filename)
