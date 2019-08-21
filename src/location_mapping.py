@@ -7,6 +7,7 @@ Created on Thu Jun 27 14:40:59 2019
 import sys
 from generic_mapping import genericmapping
 from constants import constants
+import numpy as np
 
 class mapping:
     """
@@ -34,23 +35,21 @@ class mapping:
         
         """
         genericmapping_obj = genericmapping()
-        OED_location_file_direct_mapped = genericmapping_obj.peril_mapper(OED_location_file_direct_mapped,AIR_location_file,constants.OED_LOC_PERIL_COL,logger)
-        OED_location_file_direct_mapped = genericmapping_obj.peril_mapper(OED_location_file_direct_mapped,AIR_location_file,constants.OED_LOC_PERIL_COV_COL,logger)
+        OED_location_file_direct_mapped = genericmapping_obj.peril_mapper(OED_location_file_direct_mapped,AIR_location_file,[constants.OED_LOC_PERIL_COV_COL,constants.OED_LOC_PERIL_COL],logger)
         OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.ADRRESS_MATCH_MAPPING,OED_location_file_direct_mapped,constants.ADDRESSMATCH_COL,True,logger)
         OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.OCCUPANCY_CODE_MAPPING,OED_location_file_direct_mapped,constants.OCCUPANCY_COL,False,logger)
         OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.CONSTRUCTION_CODE_MAPPING,OED_location_file_direct_mapped,constants.CONSTRUCTION_COL,False,logger)
         OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.FLOORAREA_COL,False,logger)
-        for index, row in OED_location_file_value_mapped.iterrows():
-            try:
-                OED_location_file_value_mapped.at[index, 'GeogScheme1'] = "XSUBA"   
-                OED_location_file_value_mapped.at[index, 'GeogScheme2'] = "XSUB2"
-                logger.info('Successfully assigning Geographic scheme with constant')                  
-            except Exception as e:
-                logger.info('Issue in assigning Geographic scheme with constant')
-                logger.error(e,exc_info=True)
-                print("Error Check Log file")
-                sys.exit(0)
-        return OED_location_file_value_mapped    
+        try:
+            OED_location_file_value_mapped['GeogScheme1'] = "XSUBA"
+            OED_location_file_value_mapped['GeogScheme2'] = "XSUB2"
+            logger.info('Successfully assigning Geographic scheme with constant')
+        except Exception as e:
+            logger.info('Issue in assigning Geographic scheme with constant')
+            logger.error(e,exc_info=True)
+            print("Error Check Log file")
+            sys.exit(0)
+        return OED_location_file_value_mapped
 
     def conditional_mapping(self,OED_location_file_value_mapped, AIR_location_file,logger):
         """
@@ -59,166 +58,74 @@ class mapping:
         The conditional mapping are done on basis of these two columns with condditions.
         """
         try:
-            for index, row in AIR_location_file.iterrows(): 
-                if AIR_location_file['LimitTypeCode'][index] == 'S':
-                    OED_location_file_value_mapped.at[index, 'LocLimitCode6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimitType6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimit6All'] = AIR_location_file['Limit1'][index]
-                elif AIR_location_file['LimitTypeCode'][index] == 'C':
-                    OED_location_file_value_mapped.at[index, 'LocLimitCode1Building'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimitType1Building'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimit1Building'] = AIR_location_file['Limit1'][index]
-                    OED_location_file_value_mapped.at[index, 'LocLimitCode2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimitType2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimit2Other'] = AIR_location_file['Limit2'][index]
-                    OED_location_file_value_mapped.at[index, 'LocLimitCode3Contents'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimitType3Contents'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimit3Contents'] = AIR_location_file['Limit3'][index]
-                    OED_location_file_value_mapped.at[index, 'LocLimitCode4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimitType4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocLimit4BI'] = AIR_location_file['Limit4'][index]
-            logger.info('Successfully assigning Limit term value as per LimitTypeCode condition')                  
+            """
+            Limit Cases
+            """
+
+            OED_location_file_value_mapped['LocLimit6All'] = np.where(AIR_location_file['LimitTypeCode'] == 'S',AIR_location_file['Limit1'],None)
+            OED_location_file_value_mapped['LocLimit1Building'] = np.where(AIR_location_file['LimitTypeCode'] == 'C',AIR_location_file['Limit1'],None)
+            OED_location_file_value_mapped['LocLimit2Other'] = np.where(AIR_location_file['LimitTypeCode'] == 'C', AIR_location_file['Limit2'],None)
+            OED_location_file_value_mapped['LocLimit3Contents'] = np.where(AIR_location_file['LimitTypeCode'] == 'C', AIR_location_file['Limit3'],None)
+            OED_location_file_value_mapped['LocLimit4BI'] = np.where(AIR_location_file['LimitTypeCode'] == 'C',AIR_location_file['Limit4'],None)
+
+            """
+            Deductible Cases
+            """
+            OED_location_file_value_mapped['LocDed1Building'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',AIR_location_file['Deductible1'],None)
+            OED_location_file_value_mapped['LocDed2Other'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',AIR_location_file['Deductible2'],None)
+            OED_location_file_value_mapped['LocDed3Contents'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',AIR_location_file['Deductible3'],None)
+            OED_location_file_value_mapped['LocDed4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',AIR_location_file['Deductible4'],None)
+            OED_location_file_value_mapped['LocDedType1Building'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',1,None)
+            OED_location_file_value_mapped['LocDedType2Other'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',1,None)
+            OED_location_file_value_mapped['LocDedType3Contents'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',1,None)
+            OED_location_file_value_mapped['LocDed4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',1,None)
+
+            OED_location_file_value_mapped['LocDedType2Other'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'MP',AIR_location_file['Deductible1'], None)
+            OED_location_file_value_mapped['LocDedType3Contents'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'MP', 5, None)
+            OED_location_file_value_mapped['LocDed4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'MP',2, None)
+
+            OED_location_file_value_mapped['LocDed5PD'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'ML', AIR_location_file['Deductible2'], None)
+            OED_location_file_value_mapped['LocDedType5PD'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'ML', 1, None)
+            OED_location_file_value_mapped['LocMaxDed5PD'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'ML', AIR_location_file['Deductible1'], None)
+            OED_location_file_value_mapped['LocDed4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'ML', AIR_location_file['Deductible4'], None)
+
+            AIR_location_file['Deductible1'] = np.where(AIR_location_file['Deductible1']<1,AIR_location_file['Deductible1']*AIR_location_file['Limit1'],AIR_location_file['Deductible1'])
+            AIR_location_file['Deductible2'] = np.where(AIR_location_file['Deductible2']<1,AIR_location_file['Deductible2']*AIR_location_file['Limit2'],AIR_location_file['Deductible2'])
+            AIR_location_file['Deductible3'] = np.where(AIR_location_file['Deductible3']<1,AIR_location_file['Deductible3']*AIR_location_file['Limit3'],AIR_location_file['Deductible3'])
+            AIR_location_file['Deductible4'] = np.where(AIR_location_file['Deductible4']<1,AIR_location_file['Deductible4']*AIR_location_file['Limit4'],AIR_location_file['Deductible4'])
+
+            OED_location_file_value_mapped['LocDed1Building'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'C', AIR_location_file['Deductible1'], None)
+            OED_location_file_value_mapped['LocDed2Other'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'C', AIR_location_file['Deductible2'], None)
+            OED_location_file_value_mapped['LocDed3Contents'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'C', AIR_location_file['Deductible3'], None)
+            OED_location_file_value_mapped['LocDed4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'C', AIR_location_file['Deductible4'], None)
+
+            OED_location_file_value_mapped['LocDed5PD'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'CB', AIR_location_file['Deductible1']+AIR_location_file['Deductible2']+AIR_location_file['Deductible3'], None)
+            OED_location_file_value_mapped['LocDed5PD'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'CT', AIR_location_file['Deductible1']+AIR_location_file['Deductible2']+AIR_location_file['Deductible3'], None)
+            OED_location_file_value_mapped['LocDed4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'CT',AIR_location_file['Deductible4'], None)
+
+            OED_location_file_value_mapped['LocDed6All'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'S', AIR_location_file['Deductible1']+AIR_location_file['Deductible2']+AIR_location_file['Deductible3']+AIR_location_file['Deductible4'], None)
+            OED_location_file_value_mapped['LocDed6All'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'FR', AIR_location_file['Deductible1']+AIR_location_file['Deductible2']+AIR_location_file['Deductible3']+AIR_location_file['Deductible4'], None)
+            OED_location_file_value_mapped['LocDedCode6All'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'FR',1,None)
+
+            OED_location_file_value_mapped['LocDed5PD'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'CT',AIR_location_file['Deductible1'], None)
+            OED_location_file_value_mapped['LocDedType5PD'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'CT',1, None)
+            OED_location_file_value_mapped['LocDed4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'CT',AIR_location_file['Deductible4'], None)
+            OED_location_file_value_mapped['LocDedCode4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'CT',1, None)
+            logger.info('Successfully assigning Limit and Deductible term value as per DeductibleTypeCode condition')
         except Exception as e:
-            logger.info('Issue in assigning Limit term value as per LimitTypeCode condition')
-            logger.error(e,exc_info=True)  
-            print("Error Check Log file")
-            sys.exit(0)
-        
-        try:
-            for index, row in AIR_location_file.iterrows():  
-                if AIR_location_file['DeductibleTypeCode'][index] == 'N':
-                    OED_location_file_value_mapped.at[index, 'LocDedCode6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed6All'] = 0   
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'C':
-                    OED_location_file_value_mapped.at[index, 'LocDed1Building'] = AIR_location_file['Deductible1'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode1Building'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType1Building'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed1Building'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed1Building'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDed2Other'] = AIR_location_file['Deductible2'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDed3Contents'] = AIR_location_file['Deductible3'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode3Contents'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType3Contents'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed3Contents'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed3Contents'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDed4BI'] = AIR_location_file['Deductible4'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed4BI'] = 0
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'CB':
-                    OED_location_file_value_mapped.at[index, 'LocDed5PD'] = AIR_location_file['Deductible1'][index]+AIR_location_file['Deductible2'][index]+AIR_location_file['Deductible3'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed5PD'] = 0
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'CT':
-                    OED_location_file_value_mapped.at[index, 'LocDed5PD'] = AIR_location_file['Deductible1'][index]+AIR_location_file['Deductible2'][index]+AIR_location_file['Deductible3'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDed4BI'] = AIR_location_file['Deductible4'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed4BI'] = 0
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'S':   
-                    self.Ded1 = AIR_location_file['Deductible1'][index]
-                    self.Ded2 = AIR_location_file['Deductible2'][index]
-                    self.Ded3 = AIR_location_file['Deductible3'][index]
-                    self.Ded4 = AIR_location_file['Deductible4'][index]
-                    if self.Ded1 < 1:
-                        self.Ded1 = self.Ded1 * AIR_location_file['Limit1'][index]
-                    if self.Ded2 < 1:
-                        self.Ded2 = self.Ded2 * AIR_location_file['Limit2'][index]
-                    if self.Ded3 < 1:
-                        self.Ded3 = self.Ded3 * AIR_location_file['Limit3'][index]
-                    if self.Ded4 < 1:
-                        self.Ded4 = self.Ded4 * AIR_location_file['Limit4'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDed6All'] = self.Ded1+self.Ded2+self.Ded3+self.Ded4
-                    OED_location_file_value_mapped.at[index, 'LocDedCode6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed6All'] = 0
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'FR':
-                    OED_location_file_value_mapped.at[index, 'LocDed6All'] = AIR_location_file['Deductible1'][index]+AIR_location_file['Deductible2'][index]+AIR_location_file['Deductible3'][index]+AIR_location_file['Deductible4'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode6All'] = 1
-                    OED_location_file_value_mapped.at[index, 'LocDedType6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed6All'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed6All'] = 0
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'PL':
-                    OED_location_file_value_mapped.at[index, 'LocDed1Building'] = AIR_location_file['Deductible1'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedType1Building'] = 1                                                                                                          
-                    OED_location_file_value_mapped.at[index, 'LocDed2Other'] = AIR_location_file['Deductible2'][index]+AIR_location_file['Deductible2'][index]+AIR_location_file['Deductible3'][index]+AIR_location_file['Deductible4'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDeductType2Other'] = 1                                                                                                          
-                    OED_location_file_value_mapped.at[index, 'LocDed3Content'] = AIR_location_file['Deductible3'][index]+AIR_location_file['Deductible2'][index]+AIR_location_file['Deductible3'][index]+AIR_location_file['Deductible4'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDeductType3Content'] = 1                                                                                                         
-                    OED_location_file_value_mapped.at[index, 'LocDed4BI'] = AIR_location_file['Deductible4'][index]+AIR_location_file['Deductible2'][index]+AIR_location_file['Deductible3'][index]+AIR_location_file['Deductible4'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDeductType4BI'] = 1
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'MP':
-                    OED_location_file_value_mapped.at[index, 'LocDed1Building'] = AIR_location_file['Deductible1'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode1Building'] = 5
-                    OED_location_file_value_mapped.at[index, 'LocDedType1Building'] = 2
-                    OED_location_file_value_mapped.at[index, 'LocMinDed1Building'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed1Building'] = 0                                                     
-                    OED_location_file_value_mapped.at[index, 'LocDed2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedCode2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDeductType2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed2Other'] = 0                                                            
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed2Other'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDed3Content'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedCode3Content'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDeductType3Content'] = 0                                                          
-                    OED_location_file_value_mapped.at[index, 'LocMinDed3Content'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed3Content'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDed4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedCode4BI'] = 0                                                         
-                    OED_location_file_value_mapped.at[index, 'LocDeductType4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed4BI'] = 0    
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'ML':
-                    OED_location_file_value_mapped.at[index, 'LocDed5PD'] = AIR_location_file['Deductible2'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType5PD'] = 1
-                    OED_location_file_value_mapped.at[index, 'LocMinDed5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed5PD'] = AIR_location_file['Deductible1'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDed4BI'] = AIR_location_file['Deductible4'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDedType4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed4BI'] = 0
-                elif AIR_location_file['DeductibleTypeCode'][index] == 'AA':
-                    OED_location_file_value_mapped.at[index, 'LocDed5PD'] = AIR_location_file['Deductible1'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode5PD'] = 1
-                    OED_location_file_value_mapped.at[index, 'LocDedType5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed5PD'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocDed4BI'] = AIR_location_file['Deductible4'][index]
-                    OED_location_file_value_mapped.at[index, 'LocDedCode4BI'] = 1
-                    OED_location_file_value_mapped.at[index, 'LocDedType4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMinDed4BI'] = 0
-                    OED_location_file_value_mapped.at[index, 'LocMaxDed4BI'] = 0
-            logger.info('Successfully assigning Deductible term value as per DeductibleTypeCode condition')                  
-        except Exception as e:
-            logger.info('Issue in assigning Deductible term value as per DeductibleTypeCode condition')
+            logger.info('Issue in assigning Limit Deductible term value as per DeductibleTypeCode condition')
             logger.error(e,exc_info=True)
             print("Error Check Log file")
-            sys.exit(0)          
-        try:        
-            for index, row in OED_location_file_value_mapped.iterrows():
-                OED_location_file_value_mapped.at[index,'CondPriority'] = 1
-                OED_location_file_value_mapped.at[index,'FloodDefenseHeightUnit'] = 1
-                OED_location_file_value_mapped.at[index,'LocParticipation'] = AIR_location_file['Participation2'][index] 
-            logger.info('Successfully assigning CondPriority, LocParticipation term value')                  
+            sys.exit(0)
+
+        try:
+            OED_location_file_value_mapped['LocParticipation'] = AIR_location_file['Participation2']
+            OED_location_file_value_mapped['FloodDefenseHeightUnit'] = 1
+            OED_location_file_value_mapped['CondPriority'] = 1
+            logger.info('Successfully assigning CondPriority, LocParticipation term value')
         except Exception as e:
             logger.info('Issue in assigning CondPriority, LocParticipation term value')
-            logger.error(e)
+            logger.error(e,exc_info=True)
             print("Error Check Log file")
             sys.exit(0)    
         OED_location_file_final = OED_location_file_value_mapped
