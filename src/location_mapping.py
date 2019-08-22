@@ -78,7 +78,7 @@ class mapping:
             OED_location_file_value_mapped['LocDedType1Building'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',1,None)
             OED_location_file_value_mapped['LocDedType2Other'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',1,None)
             OED_location_file_value_mapped['LocDedType3Contents'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',1,None)
-            OED_location_file_value_mapped['LocDeductType4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',1,None)
+            OED_location_file_value_mapped['LocDedType4BI'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'PL',1,None)
 
             OED_location_file_value_mapped['LocDedType2Other'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'MP',AIR_location_file['Deductible1'], OED_location_file_value_mapped['LocDedType2Other'])
             OED_location_file_value_mapped['LocDedType3Contents'] = np.where(AIR_location_file['DeductibleTypeCode'] == 'MP', 5, OED_location_file_value_mapped['LocDedType3Contents'])
