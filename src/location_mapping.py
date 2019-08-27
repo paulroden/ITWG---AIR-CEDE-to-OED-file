@@ -40,6 +40,11 @@ class mapping:
         OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.OCCUPANCY_CODE_MAPPING,OED_location_file_direct_mapped,constants.OCCUPANCY_COL,False,logger)
         OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.CONSTRUCTION_CODE_MAPPING,OED_location_file_direct_mapped,constants.CONSTRUCTION_COL,False,logger)
         OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.FLOORAREA_COL,False,logger)
+        OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.FIRSTFLOOR_COL,False,logger)
+        OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.GROUNDELEV_COL,False,logger)
+        OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.BASEFLDELEV_COL,False,logger)
+        OED_location_file_value_mapped = genericmapping_obj.value_mapper(constants.UNIT_MAPPING,OED_location_file_direct_mapped,constants.BUILDINGHT_COL,False,logger)
+
         try:
             OED_location_file_value_mapped['GeogScheme1'] = "XSUBA"
             OED_location_file_value_mapped['GeogScheme2'] = "XSUB2"

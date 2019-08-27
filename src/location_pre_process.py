@@ -9,6 +9,7 @@ import pandas as pd
 import ConfigParser
 from constants import constants
 from db_helper import dbhelper
+import numpy as np
 
 class pre_process:
     """
@@ -42,17 +43,7 @@ class pre_process:
             logger.error(e)
             print("Error Check Log file")
             sys.exit(0)
-          
-        try:    
-            self.query_tLoc_tContr = config.get(constants.LOCATION_QUERY, constants.TLOC_TCONTR)   
-            self.ContractID  = dbhelper().data_reader(self.query_tLoc_tContr,self.connection_string,None,logger) 
-            self.AIR_location_file = self.AIR_location_file.join(self.ContractID)  
-            logger.info('Successfully read data from AIR DB for ContractID from tloc, tcontract')                  
-        except Exception as e:   
-            logger.info('Issue in reading data from AIR DB for ContractID from tloc, tcontract')   
-            logger.error(e,exc_info=True)   
-            print("Error Check Log file") 
-            sys.exit(0)              
+
                        
         try:
             self.query_tlclx_tlc = config.get(constants.LOCATION_QUERY, constants.TLCLX_TLC) 
@@ -61,13 +52,13 @@ class pre_process:
                 self.AIR_location_file = pd.merge(self.AIR_location_file, self.LayerConditionSID, how='inner', on=['LocationSID','PerilSetCode'])    
             else:
                 self.AIR_location_file['CondNumber'] = None
-            logger.info('Successfully read data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
+            boolassigner = {'True': 1, 'False': 0}
+            self.AIR_location_file['IsTenant'] = self.AIR_location_file['IsTenant'].map(boolassigner)
+            self.AIR_location_file['IsPrimaryLocation'] = self.AIR_location_file['IsPrimaryLocation'].map(boolassigner)
+            logger.info('Successfully read data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')
         except Exception as e:   
             logger.info('Issue in reading data from AIR DB for LayerconditionSID. CondNumber from tlocCondXref, tLayerCondition')                  
             logger.error(e,exc_info=True) 
             print("Error Check Log file")
             sys.exit(0)
         return self.AIR_location_file, config.get('dbconnection', 'Database'),config.get('dbconnection', 'Server')
-    
-
-                       
