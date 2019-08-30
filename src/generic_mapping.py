@@ -7,7 +7,7 @@ Created on Wed Jul 10 13:01:09 2019
 import sys
 from file_helper import filehelper
 from db_helper import dbhelper
-import ConfigParser
+import configparser
 from constants import constants
 
 
@@ -58,7 +58,7 @@ class genericmapping:
             sys.exit(0)                                
             
         try:
-            config = ConfigParser.ConfigParser()
+            config = configparser.ConfigParser()
             config.read(constants.CONFIG_FILE_PATH)
             self.connection_string = r'Driver='+config.get('reference_dbconnection', 'Driver') +';Server='+config.get('reference_dbconnection', 'Server')+';Database='+config.get('reference_dbconnection', 'Database')+';Trusted_Connection='+config.get('reference_dbconnection', 'TrustedConnection')+';UID='+config.get('reference_dbconnection', 'ID')+';PWD='+config.get('reference_dbconnection', 'PWD')+';'            
             self.query_PERIL_SET = config.get(constants.LOCATION_QUERY,constants.PERIL_SET_CODE,logger) 
