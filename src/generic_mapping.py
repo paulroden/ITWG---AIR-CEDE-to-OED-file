@@ -61,7 +61,7 @@ class genericmapping:
             config = configparser.ConfigParser()
             config.read(constants.CONFIG_FILE_PATH)
             self.connection_string = r'Driver='+config.get('reference_dbconnection', 'Driver') +';Server='+config.get('reference_dbconnection', 'Server')+';Database='+config.get('reference_dbconnection', 'Database')+';Trusted_Connection='+config.get('reference_dbconnection', 'TrustedConnection')+';UID='+config.get('reference_dbconnection', 'ID')+';PWD='+config.get('reference_dbconnection', 'PWD')+';'            
-            self.query_PERIL_SET = config.get(constants.LOCATION_QUERY,constants.PERIL_SET_CODE,logger) 
+            self.query_PERIL_SET = config.get(constants.LOCATION_QUERY, constants.PERIL_SET_CODE, fallback=logger)
             self.peril_set_code  = dbhelper().data_reader(self.query_PERIL_SET,self.connection_string,'PerilSetCode',logger) 
             logger.info('Successfully connected to reference database for peril mapping for mapping column %s' %mapping_column)                  
         except Exception as e:
