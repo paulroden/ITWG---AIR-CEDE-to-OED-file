@@ -1,10 +1,12 @@
 {
     "USER": 1,
     "ADDR": 2,
+    "RLXA": 4,
     "POST": 7,
     "CITY": 8,
     "AREA": 9,
     "CRES": 10,
     "ZIP9": 5,
-    "CNTY": 20
+    "CNTY": 20,
+    "NONE": ""
 }
